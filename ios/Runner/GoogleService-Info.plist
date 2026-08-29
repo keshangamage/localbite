@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBOCZ2Kplrj0YZraH85Vao8pt1dMzaFrvg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1047516109337</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.localbite</string>
+	<key>PROJECT_ID</key>
+	<string>localbite-6d8e8</string>
+	<key>STORAGE_BUCKET</key>
+	<string>localbite-6d8e8.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1047516109337:ios:4e59cdde75b934a7302888</string>
+	<key>DATABASE_URL</key>
+	<string>https://localbite-6d8e8-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>
