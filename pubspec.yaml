@@ -1,5 +1,5 @@
 name: localbite
-description: "A new Flutter project."
+description: "LocalBite - discover local restaurants, save favourites and write reviews."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -21,3 +21,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/

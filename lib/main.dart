@@ -1,20 +1,28 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MainApp());
+import 'core/theme/app_theme.dart';
+import 'firebase_options.dart';
+import 'screens/main_shell.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const LocalBiteApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class LocalBiteApp extends StatelessWidget {
+  const LocalBiteApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    return MaterialApp(
+      title: 'LocalBite',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
+      home: const MainShell(),
     );
   }
 }
