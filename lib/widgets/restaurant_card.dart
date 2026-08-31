@@ -20,7 +20,13 @@ class RestaurantCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RestaurantImage(imageUrl: restaurant.imageUrl, height: 110),
+            Hero(
+              tag: restaurant.id,
+              child: RestaurantImage(
+                imageUrl: restaurant.imageUrl,
+                height: 110,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -77,7 +83,13 @@ class FeaturedRestaurantCard extends StatelessWidget {
         onTap: onTap,
         child: Stack(
           children: [
-            RestaurantImage(imageUrl: restaurant.imageUrl, height: 180),
+            Hero(
+              tag: restaurant.id,
+              child: RestaurantImage(
+                imageUrl: restaurant.imageUrl,
+                height: 180,
+              ),
+            ),
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(

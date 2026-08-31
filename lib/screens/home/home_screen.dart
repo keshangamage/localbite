@@ -4,6 +4,7 @@ import '../../models/restaurant.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../widgets/restaurant_card.dart';
+import '../restaurant/restaurant_details_screen.dart';
 import '../../widgets/state_views.dart';
 
 const List<String> kCategories = ['All', 'Cafe', 'Pizza', 'Asian', 'Fast Food'];
@@ -97,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
 
     final featured = restaurants.where((r) => r.featured).toList();
-    final topRated = [...restaurants]
+    final topRated = restaurants.where((r) => !r.featured).toList()
       ..sort((a, b) => b.rating.compareTo(a.rating));
 
     return ListView(
@@ -166,7 +167,10 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: FeaturedRestaurantCard(restaurant: featured.first),
+            child: FeaturedRestaurantCard(
+              restaurant: featured.first,
+              onTap: () => _openDetails(featured.first),
+            ),
           ),
         ],
         if (topRated.isNotEmpty) ...[
@@ -182,13 +186,25 @@ class _HomeScreenState extends State<HomeScreen> {
               separatorBuilder: (context, index) => const SizedBox(width: 12),
               itemBuilder: (context, index) => SizedBox(
                 width: 160,
-                child: RestaurantCard(restaurant: topRated[index]),
+                child: RestaurantCard(
+                  restaurant: topRated[index],
+                  onTap: () => _openDetails(topRated[index]),
+                ),
               ),
             ),
           ),
         ],
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  void _openDetails(Restaurant restaurant) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RestaurantDetailsScreen(restaurant: restaurant),
+      ),
     );
   }
 
