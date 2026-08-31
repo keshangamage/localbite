@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
-import 'screens/auth/login_screen.dart';
+import 'screens/auth/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +22,7 @@ class LocalBiteApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }

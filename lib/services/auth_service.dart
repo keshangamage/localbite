@@ -26,11 +26,18 @@ class AuthService {
     final user = credential.user!;
     await user.updateDisplayName(name);
 
-    await _usersRef.child(user.uid).set({
-      'name': name,
-      'email': email,
-      'createdAt': DateTime.now().millisecondsSinceEpoch,
-    });
+    try {
+      await _usersRef.child(user.uid).set({
+        'name': name,
+        'email': email,
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+      });
+    } catch (error) {
+      // The account exists but has no profile, so remove it and let the
+      // user try again with the same email address.
+      await user.delete();
+      rethrow;
+    }
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
