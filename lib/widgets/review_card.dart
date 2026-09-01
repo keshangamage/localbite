@@ -5,10 +5,16 @@ import '../models/review.dart';
 import 'rating_stars.dart';
 
 class ReviewCard extends StatelessWidget {
-  const ReviewCard({super.key, required this.review, this.actions});
+  const ReviewCard({
+    super.key,
+    required this.review,
+    this.actions,
+    this.showRestaurantName = false,
+  });
 
   final Review review;
   final Widget? actions;
+  final bool showRestaurantName;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +34,9 @@ class ReviewCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        review.userName,
+                        showRestaurantName
+                            ? review.restaurantName
+                            : review.userName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall?.copyWith(
