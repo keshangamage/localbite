@@ -6,7 +6,7 @@ import '../../services/database_service.dart';
 import '../../widgets/restaurant_image.dart';
 import '../../widgets/review_card.dart';
 import '../../widgets/state_views.dart';
-import 'add_review_screen.dart';
+import 'review_form_screen.dart';
 
 class RestaurantDetailsScreen extends StatelessWidget {
   const RestaurantDetailsScreen({super.key, required this.restaurant});
@@ -28,7 +28,10 @@ class RestaurantDetailsScreen extends StatelessWidget {
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AddReviewScreen(restaurant: restaurant),
+                  builder: (context) => ReviewFormScreen(
+                    restaurantId: restaurant.id,
+                    restaurantName: restaurant.name,
+                  ),
                 ),
               ),
               child: const Text('ADD REVIEW'),

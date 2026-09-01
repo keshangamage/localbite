@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/date_format.dart';
-import '../../models/restaurant.dart';
 import '../../models/review.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../widgets/rating_stars.dart';
 
-class AddReviewScreen extends StatefulWidget {
-  const AddReviewScreen({super.key, required this.restaurant});
+class ReviewFormScreen extends StatefulWidget {
+  const ReviewFormScreen({
+    super.key,
+    required this.restaurantId,
+    required this.restaurantName,
+    this.existingReview,
+  });
 
-  final Restaurant restaurant;
+  final String restaurantId;
+  final String restaurantName;
+
+  /// When this is null the form creates a new review, otherwise it edits
+  /// the review that was passed in.
+  final Review? existingReview;
 
   @override
-  State<AddReviewScreen> createState() => _AddReviewScreenState();
+  State<ReviewFormScreen> createState() => _ReviewFormScreenState();
 }
 
-class _AddReviewScreenState extends State<AddReviewScreen> {
+class _ReviewFormScreenState extends State<ReviewFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -25,6 +34,21 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
   int _rating = 0;
   DateTime _visitDate = DateTime.now();
   bool _isSaving = false;
+
+  bool get _isEditing => widget.existingReview != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final review = widget.existingReview;
+    if (review != null) {
+      _rating = review.rating;
+      _visitDate = review.visitDate;
+      _titleController.text = review.title;
+      _descriptionController.text = review.description;
+    }
+  }
 
   @override
   void dispose() {
@@ -62,24 +86,28 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
       final user = AuthService().currentUser!;
       final now = DateTime.now();
 
-      await _databaseService.addReview(
-        Review(
-          id: '',
-          userId: user.uid,
-          userName: user.displayName ?? 'LocalBite user',
-          restaurantId: widget.restaurant.id,
-          restaurantName: widget.restaurant.name,
-          rating: _rating,
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          visitDate: _visitDate,
-          createdAt: now,
-          updatedAt: now,
-        ),
+      final review = Review(
+        id: widget.existingReview?.id ?? '',
+        userId: user.uid,
+        userName: user.displayName ?? 'LocalBite user',
+        restaurantId: widget.restaurantId,
+        restaurantName: widget.restaurantName,
+        rating: _rating,
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        visitDate: _visitDate,
+        createdAt: widget.existingReview?.createdAt ?? now,
+        updatedAt: now,
       );
 
+      if (_isEditing) {
+        await _databaseService.updateReview(review);
+      } else {
+        await _databaseService.addReview(review);
+      }
+
       if (!mounted) return;
-      _showMessage('Review added.');
+      _showMessage(_isEditing ? 'Review updated.' : 'Review added.');
       Navigator.pop(context);
     } catch (error) {
       _showMessage(
@@ -113,7 +141,7 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Review')),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit Review' : 'Add Review')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -123,7 +151,7 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.restaurant.name,
+                  widget.restaurantName,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -194,7 +222,7 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
                             width: 22,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('SUBMIT REVIEW'),
+                        : Text(_isEditing ? 'UPDATE REVIEW' : 'SUBMIT REVIEW'),
                   ),
                 ),
               ],
