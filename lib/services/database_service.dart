@@ -12,6 +12,10 @@ class DatabaseService {
     'reviews',
   );
 
+  final DatabaseReference _favouritesRef = FirebaseDatabase.instance.ref(
+    'favourites',
+  );
+
   Stream<List<Restaurant>> restaurantsStream() {
     return _restaurantsRef.onValue.map((event) {
       final data = event.snapshot.value as Map<dynamic, dynamic>?;
@@ -62,6 +66,29 @@ class DatabaseService {
 
   Future<void> deleteReview(String reviewId) async {
     await _reviewsRef.child(reviewId).remove();
+  }
+
+  Stream<Set<String>> favouriteIdsStream(String userId) {
+    return _favouritesRef.child(userId).onValue.map((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      if (data == null) {
+        return <String>{};
+      }
+      return data.keys.map((key) => key as String).toSet();
+    });
+  }
+
+  Future<void> setFavourite({
+    required String userId,
+    required String restaurantId,
+    required bool isFavourite,
+  }) async {
+    final ref = _favouritesRef.child(userId).child(restaurantId);
+    if (isFavourite) {
+      await ref.set(true);
+    } else {
+      await ref.remove();
+    }
   }
 
   List<Review> _reviewsFromEvent(DatabaseEvent event) {
