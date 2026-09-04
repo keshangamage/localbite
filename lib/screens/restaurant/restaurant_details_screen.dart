@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../models/restaurant.dart';
 import '../../models/review.dart';
+import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
+import '../../widgets/favourite_button.dart';
 import '../../widgets/restaurant_image.dart';
 import '../../widgets/review_card.dart';
 import '../../widgets/state_views.dart';
@@ -17,6 +19,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final databaseService = DatabaseService();
+    final userId = AuthService().currentUser?.uid ?? '';
 
     return Scaffold(
       bottomNavigationBar: SafeArea(
@@ -55,6 +58,30 @@ class RestaurantDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: StreamBuilder<Set<String>>(
+                  stream: databaseService.favouriteIdsStream(userId),
+                  builder: (context, snapshot) {
+                    final isFavourite =
+                        snapshot.data?.contains(restaurant.id) ?? false;
+
+                    return CircleAvatar(
+                      backgroundColor: theme.colorScheme.surface,
+                      child: FavouriteButton(
+                        isFavourite: isFavourite,
+                        onPressed: () => databaseService.setFavourite(
+                          userId: userId,
+                          restaurantId: restaurant.id,
+                          isFavourite: !isFavourite,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
                 tag: restaurant.id,
