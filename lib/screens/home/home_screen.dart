@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/layout.dart';
 import '../../models/restaurant.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
@@ -177,21 +178,47 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 24),
           _sectionTitle('Top Rated'),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 200,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: topRated.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 12),
-              itemBuilder: (context, index) => SizedBox(
-                width: 160,
-                child: RestaurantCard(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = gridColumnsFor(constraints.maxWidth);
+
+              if (columns == 1) {
+                return SizedBox(
+                  height: 200,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: topRated.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 12),
+                    itemBuilder: (context, index) => SizedBox(
+                      width: 160,
+                      child: RestaurantCard(
+                        restaurant: topRated[index],
+                        onTap: () => _openDetails(topRated[index]),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.85,
+                ),
+                itemCount: topRated.length,
+                itemBuilder: (context, index) => RestaurantCard(
                   restaurant: topRated[index],
                   onTap: () => _openDetails(topRated[index]),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
         const SizedBox(height: 24),
