@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
 import '../auth/login_screen.dart';
+import '../favourites/favourites_screen.dart';
 import '../reviews/my_reviews_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -65,6 +66,24 @@ class ProfileScreen extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const MyReviewsScreen()),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.favorite_border),
+            title: const Text('Favourites'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FavouritesScreen()),
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.brightness_6_outlined),
+            title: const Text('Appearance'),
+            subtitle: Text(
+              'Follows your device setting  ·  currently '
+              '${theme.brightness == Brightness.dark ? 'Dark' : 'Light'}',
             ),
           ),
           const Divider(),
