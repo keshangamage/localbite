@@ -1,61 +1,44 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/restaurant.dart';
 import '../models/review.dart';
 
 class DatabaseService {
-  final DatabaseReference _restaurantsRef = FirebaseDatabase.instance.ref(
-    'restaurants',
-  );
+  final _firestore = FirebaseFirestore.instance;
+  final _restaurantsRef = FirebaseFirestore.instance.collection('restaurants');
+  final _reviewsRef = FirebaseFirestore.instance.collection('reviews');
 
-  final DatabaseReference _reviewsRef = FirebaseDatabase.instance.ref(
-    'reviews',
-  );
-
-  final DatabaseReference _favouritesRef = FirebaseDatabase.instance.ref(
-    'favourites',
-  );
+  CollectionReference<Map<String, dynamic>> _favouritesRef(String userId) =>
+      _firestore.collection('users').doc(userId).collection('favourites');
 
   Stream<List<Restaurant>> restaurantsStream() {
-    return _restaurantsRef.onValue.map((event) {
-      final data = event.snapshot.value as Map<dynamic, dynamic>?;
-      if (data == null) {
-        return <Restaurant>[];
-      }
-
-      return data.entries
-          .map(
-            (entry) => Restaurant.fromMap(
-              entry.key as String,
-              entry.value as Map<dynamic, dynamic>,
-            ),
-          )
-          .toList();
-    });
+    return _restaurantsRef.snapshots().map(
+      (snapshot) => snapshot.docs
+          .map((doc) => Restaurant.fromMap(doc.id, doc.data()))
+          .toList(),
+    );
   }
 
   Stream<List<Review>> reviewsForRestaurant(String restaurantId) {
     return _reviewsRef
-        .orderByChild('restaurantId')
-        .equalTo(restaurantId)
-        .onValue
-        .map(_reviewsFromEvent);
+        .where('restaurantId', isEqualTo: restaurantId)
+        .snapshots()
+        .map(_reviewsFromSnapshot);
   }
 
   Stream<List<Review>> reviewsForUser(String userId) {
     return _reviewsRef
-        .orderByChild('userId')
-        .equalTo(userId)
-        .onValue
-        .map(_reviewsFromEvent);
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map(_reviewsFromSnapshot);
   }
 
   Future<void> addReview(Review review) async {
-    await _reviewsRef.push().set(review.toMap());
+    await _reviewsRef.add(review.toMap());
   }
 
   Future<void> updateReview(Review review) async {
-    await _reviewsRef.child(review.id).update({
+    await _reviewsRef.doc(review.id).update({
       'rating': review.rating,
       'title': review.title,
       'description': review.description,
@@ -65,17 +48,13 @@ class DatabaseService {
   }
 
   Future<void> deleteReview(String reviewId) async {
-    await _reviewsRef.child(reviewId).remove();
+    await _reviewsRef.doc(reviewId).delete();
   }
 
   Stream<Set<String>> favouriteIdsStream(String userId) {
-    return _favouritesRef.child(userId).onValue.map((event) {
-      final data = event.snapshot.value as Map<dynamic, dynamic>?;
-      if (data == null) {
-        return <String>{};
-      }
-      return data.keys.map((key) => key as String).toSet();
-    });
+    return _favouritesRef(userId).snapshots().map(
+      (snapshot) => snapshot.docs.map((doc) => doc.id).toSet(),
+    );
   }
 
   Future<void> setFavourite({
@@ -83,27 +62,19 @@ class DatabaseService {
     required String restaurantId,
     required bool isFavourite,
   }) async {
-    final ref = _favouritesRef.child(userId).child(restaurantId);
+    final ref = _favouritesRef(userId).doc(restaurantId);
     if (isFavourite) {
-      await ref.set(true);
+      await ref.set({'saved': true});
     } else {
-      await ref.remove();
+      await ref.delete();
     }
   }
 
-  List<Review> _reviewsFromEvent(DatabaseEvent event) {
-    final data = event.snapshot.value as Map<dynamic, dynamic>?;
-    if (data == null) {
-      return <Review>[];
-    }
-
-    final reviews = data.entries
-        .map(
-          (entry) => Review.fromMap(
-            entry.key as String,
-            entry.value as Map<dynamic, dynamic>,
-          ),
-        )
+  List<Review> _reviewsFromSnapshot(
+    QuerySnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final reviews = snapshot.docs
+        .map((doc) => Review.fromMap(doc.id, doc.data()))
         .toList();
 
     reviews.sort((a, b) => b.createdAt.compareTo(a.createdAt));

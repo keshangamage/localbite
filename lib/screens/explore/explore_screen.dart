@@ -55,19 +55,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
     });
   }
 
-  String? _distanceLabel(Restaurant restaurant) {
+  double? _distanceKm(Restaurant restaurant) {
     final position = _position;
     if (position == null) {
       return null;
     }
 
-    final km = _locationService.distanceInKm(
+    return _locationService.distanceInKm(
       fromLatitude: position.latitude,
       fromLongitude: position.longitude,
       toLatitude: restaurant.latitude,
       toLongitude: restaurant.longitude,
     );
-    return '${km.toStringAsFixed(1)} km';
   }
 
   List<Restaurant> _applyFilters(List<Restaurant> restaurants) {
@@ -216,6 +215,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return StreamBuilder<Set<String>>(
       stream: _databaseService.favouriteIdsStream(userId),
       builder: (context, favouriteSnapshot) {
+        if (favouriteSnapshot.hasError) {
+          return const ErrorView(message: 'Could not load your favourites.');
+        }
+        if (!favouriteSnapshot.hasData) {
+          return const LoadingView();
+        }
         final favouriteIds = favouriteSnapshot.data ?? <String>{};
 
         return StreamBuilder<List<Restaurant>>(
@@ -273,7 +278,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     String userId,
     Set<String> favouriteIds,
   ) {
-    final distance = _distanceLabel(restaurant);
+    final distanceKm = _distanceKm(restaurant);
     final isFavourite = favouriteIds.contains(restaurant.id);
 
     return RestaurantListTile(
@@ -287,8 +292,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (distance != null)
-            Text(distance, style: Theme.of(context).textTheme.bodyMedium),
+          if (distanceKm != null)
+            Text(
+              '${distanceKm.toStringAsFixed(1)} km',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           FavouriteButton(
             isFavourite: isFavourite,
             onPressed: () => _databaseService.setFavourite(

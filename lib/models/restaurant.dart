@@ -12,8 +12,6 @@ class Restaurant {
     required this.reviewCount,
     required this.imageUrl,
     required this.openingHours,
-    required this.phone,
-    required this.website,
     required this.featured,
   });
 
@@ -29,8 +27,6 @@ class Restaurant {
   final int reviewCount;
   final String imageUrl;
   final String openingHours;
-  final String phone;
-  final String website;
   final bool featured;
 
   factory Restaurant.fromMap(String id, Map<dynamic, dynamic> map) {
@@ -47,8 +43,6 @@ class Restaurant {
       reviewCount: (map['reviewCount'] as num?)?.toInt() ?? 0,
       imageUrl: map['imageUrl'] as String? ?? '',
       openingHours: map['openingHours'] as String? ?? '',
-      phone: map['phone'] as String? ?? '',
-      website: map['website'] as String? ?? '',
       featured: map['featured'] as bool? ?? false,
     );
   }

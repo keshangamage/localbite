@@ -11,5 +11,3 @@ int gridColumnsFor(double width) {
   }
   return 1;
 }
-
-bool isWide(double width) => width >= 600;
