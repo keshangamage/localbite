@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _usersRef = FirebaseDatabase.instance.ref('users');
+  final _usersRef = FirebaseFirestore.instance.collection('users');
 
   User? get currentUser => _auth.currentUser;
 
@@ -27,7 +27,7 @@ class AuthService {
     await user.updateDisplayName(name);
 
     try {
-      await _usersRef.child(user.uid).set({
+      await _usersRef.doc(user.uid).set({
         'name': name,
         'email': email,
         'createdAt': DateTime.now().millisecondsSinceEpoch,

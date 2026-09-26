@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../models/restaurant.dart';
 import '../../models/review.dart';
 import '../../services/auth_service.dart';
@@ -11,9 +12,17 @@ import '../../widgets/state_views.dart';
 import 'review_form_screen.dart';
 
 class RestaurantDetailsScreen extends StatelessWidget {
-  const RestaurantDetailsScreen({super.key, required this.restaurant});
+  const RestaurantDetailsScreen({
+    super.key,
+    required this.restaurant,
+    this.distanceKm,
+  });
 
   final Restaurant restaurant;
+
+  /// Distance from the user, when the caller already has a location fix.
+  /// Null when the screen was opened from somewhere without one.
+  final double? distanceKm;
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +156,22 @@ class RestaurantDetailsScreen extends StatelessWidget {
     return StreamBuilder<Set<String>>(
       stream: databaseService.favouriteIdsStream(userId),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Tooltip(
+            message: 'Could not load your favourites',
+            child: Icon(Icons.error_outline),
+          );
+        }
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            width: 40,
+            height: 40,
+            child: Padding(
+              padding: EdgeInsets.all(10),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          );
+        }
         final isFavourite = snapshot.data?.contains(restaurant.id) ?? false;
 
         return CircleAvatar(
@@ -197,11 +222,32 @@ class RestaurantDetailsScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Text(
-          '${restaurant.category}  ·  ${restaurant.city}',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${restaurant.category}  ·  ${restaurant.city}',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            if (distanceKm != null) ...[
+              Icon(
+                Icons.location_on,
+                size: 18,
+                color: AppColors.of(context).brandDeep,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${distanceKm!.toStringAsFixed(1)} km',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: AppColors.of(context).brandDeep,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ],
         ),
         _section(context, 'About', restaurant.description),
         _section(context, 'Opening Hours', restaurant.openingHours),
