@@ -10,14 +10,25 @@ class FavouriteButton extends StatelessWidget {
   });
 
   final bool isFavourite;
-  final VoidCallback onPressed;
+  final Future<void> Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
     final appColors = AppColors.of(context);
 
     return IconButton(
-      onPressed: onPressed,
+      onPressed: () async {
+        try {
+          await onPressed();
+        } catch (_) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not update favourite. Please try again.'),
+            ),
+          );
+        }
+      },
       icon: AnimatedSwitcher(
         duration: const Duration(milliseconds: 250),
         transitionBuilder: (child, animation) =>

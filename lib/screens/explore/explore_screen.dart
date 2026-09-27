@@ -44,15 +44,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
     }
 
     setState(() => _isLoadingLocation = true);
-    final result = await _locationService.getCurrentPosition();
-    if (!mounted) return;
-
-    setState(() {
-      _isLoadingLocation = false;
-      _locationStatus = result.status;
-      _position = result.position;
-      _nearbyOnly = result.status == LocationStatus.granted;
-    });
+    try {
+      final result = await _locationService.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _isLoadingLocation = false;
+        _locationStatus = result.status;
+        _position = result.position;
+        _nearbyOnly = result.status == LocationStatus.granted;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingLocation = false;
+        _nearbyOnly = false;
+        _position = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not get your location. Try again.')),
+      );
+    }
   }
 
   double? _distanceKm(Restaurant restaurant) {
@@ -163,7 +174,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 : const Icon(Icons.location_on_outlined, size: 18),
             label: const Text('Nearby'),
             selected: _nearbyOnly,
-            onSelected: (_) => _toggleNearby(),
+            onSelected: _isLoadingLocation ? null : (_) => _toggleNearby(),
           ),
           const SizedBox(width: 8),
           for (final category in categories) ...[
